@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -43,7 +43,7 @@ struct ContentView: View {
 
     private var toolbar: some View {
         HStack(spacing: 16) {
-            Text("Colemak Trainer")
+            Text("Colemac")
                 .font(AppTheme.monoFont)
                 .foregroundColor(AppTheme.correctText)
 
@@ -54,7 +54,7 @@ struct ContentView: View {
 
                 Picker("Level", selection: $selectedLevel) {
                     ForEach(Level.all) { level in
-                        Text("L\(level.id): \(level.name)").tag(level)
+                        Text("Level \(level.id): \(level.name)").tag(level)
                     }
                 }
                 .pickerStyle(.menu)
@@ -101,7 +101,7 @@ struct ContentView: View {
         }
     }
 
-    private func modeGroup(_ label: String, _ modes: [SessionMode]) -> some View {
+    private func modeGroup(_: String, _ modes: [SessionMode]) -> some View {
         HStack(spacing: 2) {
             ForEach(modes, id: \.label) { mode in
                 modeButton(mode)

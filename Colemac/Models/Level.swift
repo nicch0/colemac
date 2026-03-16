@@ -13,13 +13,15 @@ struct Level: Identifiable, Hashable {
             (2, "+DH", "dh"),
             (3, "+PGJL", "pgjl"),
             (4, "+CVBK", "cvbk"),
-            (5, "+WF UY", "wfuy"),
+            (5, "+WFUY", "wfuy"),
             (6, "+QZXM", "qzxm"),
-            (7, "Mastery", ""),
+            (7, "Master", ""),
         ]
 
-        return definitions.map { (id, name, newKeys) in
-            for c in newKeys { cumulative.insert(c) }
+        return definitions.map { id, name, newKeys in
+            for c in newKeys {
+                cumulative.insert(c)
+            }
             return Level(id: id, name: name, newKeys: newKeys, unlockedKeys: cumulative)
         }
     }()

@@ -4,8 +4,11 @@ struct TypingView: View {
     @Bindable var engine: TypingEngine
     @FocusState private var isFocused: Bool
     @State private var cursorVisible = true
+    @State private var deleteMonitor: Any?
 
-    private var isZen: Bool { engine.state.sessionMode.isZen }
+    private var isZen: Bool {
+        engine.state.sessionMode.isZen
+    }
 
     var body: some View {
         GeometryReader { geo in
@@ -37,13 +40,22 @@ struct TypingView: View {
         .onAppear {
             isFocused = true
             startCursorBlink()
+            deleteMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                if event.keyCode == 51 { // backspace key
+                    engine.handleBackspace()
+                    return nil // consume the event
+                }
+                return event
+            }
+        }
+        .onDisappear {
+            if let monitor = deleteMonitor {
+                NSEvent.removeMonitor(monitor)
+                deleteMonitor = nil
+            }
         }
         .onKeyPress(.space) {
             engine.handleKeyPress(" ") ? .handled : .ignored
-        }
-        .onKeyPress(.delete) {
-            engine.handleBackspace()
-            return .handled
         }
         .onKeyPress(.escape) {
             if isZen {
@@ -108,7 +120,7 @@ struct TypingView: View {
         let lines = visibleLines(charWidth: charWidth, maxWidth: maxWidth)
 
         return VStack(alignment: .leading, spacing: 8 * scale) {
-            ForEach(Array(lines.enumerated()), id: \.offset) { lineIndex, line in
+            ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
                 HStack(spacing: 0) {
                     ForEach(Array(line.enumerated()), id: \.offset) { wordOffset, wordInfo in
                         if wordOffset > 0 {
@@ -169,7 +181,7 @@ struct TypingView: View {
         HStack(spacing: 32) {
             if let _ = engine.state.targetSeconds, engine.state.startTime != nil {
                 statItem(label: "", value: formatDuration(engine.state.remainingTime))
-            } else if case .words(let target) = engine.state.sessionMode {
+            } else if case let .words(target) = engine.state.sessionMode {
                 statItem(label: "/ \(target)", value: "\(engine.state.wordsCompleted)")
             }
 
@@ -231,12 +243,12 @@ struct TypingView: View {
         var currentLine: [WordInfo] = []
         var lineWidth: CGFloat = 0
 
-        for i in 0..<words.count {
+        for i in 0 ..< words.count {
             let word = words[i]
             let wordWidth = CGFloat(word.count) * charWidth
             let spaceWidth = currentLine.isEmpty ? 0 : charWidth
 
-            if lineWidth + spaceWidth + wordWidth > maxWidth && !currentLine.isEmpty {
+            if lineWidth + spaceWidth + wordWidth > maxWidth, !currentLine.isEmpty {
                 allLines.append(currentLine)
                 currentLine = []
                 lineWidth = 0
@@ -249,7 +261,7 @@ struct TypingView: View {
             if allLines.count > 0 {
                 let lastLineContainsCursor = allLines.last?.contains(where: { $0.index == currentWordIndex }) ?? false
                 let currentLineContainsCursor = currentLine.contains(where: { $0.index == currentWordIndex })
-                if !lastLineContainsCursor && !currentLineContainsCursor && allLines.count > 3 {
+                if !lastLineContainsCursor, !currentLineContainsCursor, allLines.count > 3 {
                     // We have enough lines past the cursor
                     break
                 }
@@ -267,6 +279,6 @@ struct TypingView: View {
         // Show current line + 2 after
         let start = cursorLineIndex
         let end = min(start + 3, allLines.count)
-        return Array(allLines[start..<end])
+        return Array(allLines[start ..< end])
     }
 }
