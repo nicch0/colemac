@@ -13,4 +13,18 @@ enum AppTheme {
     static let monoFont = Font.system(size: 20, design: .monospaced)
     static let monoFontSmall = Font.system(size: 14, design: .monospaced)
     static let monoFontLarge = Font.system(size: 24, design: .monospaced)
+
+    static let pointerCursor = HoverModifier()
+
+    struct HoverModifier: ViewModifier {
+        func body(content: Content) -> some View {
+            content.onHover { hovering in
+                if hovering {
+                    NSCursor.pointingHand.push()
+                } else {
+                    NSCursor.pop()
+                }
+            }
+        }
+    }
 }

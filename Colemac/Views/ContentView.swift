@@ -32,7 +32,7 @@ struct ContentView: View {
             engine.start(level: selectedLevel, mode: newMode)
         }
         .onChange(of: engine.state.isFinished) { _, finished in
-            if finished {
+            if finished, engine.state.totalKeystrokes > 0 {
                 saveSession()
             }
         }
@@ -43,16 +43,22 @@ struct ContentView: View {
 
     private var toolbar: some View {
         HStack(spacing: 16) {
-            Text("Colemac")
-                .font(AppTheme.monoFont)
-                .foregroundColor(AppTheme.correctText)
+            Button("Colemac") {
+                showStats = false
+            }
+            .buttonStyle(.plain)
+            .font(AppTheme.monoFont)
+            .foregroundColor(AppTheme.correctText)
+            .modifier(AppTheme.pointerCursor)
 
             Spacer()
 
             if !showStats {
                 modeSelector
 
-                Picker("Level", selection: $selectedLevel) {
+                Spacer()
+
+                Picker("", selection: $selectedLevel) {
                     ForEach(Level.all) { level in
                         Text("Level \(level.id): \(level.name)").tag(level)
                     }
@@ -68,6 +74,7 @@ struct ContentView: View {
             .buttonStyle(.plain)
             .foregroundColor(AppTheme.accentGreen)
             .font(AppTheme.monoFontSmall)
+            .modifier(AppTheme.pointerCursor)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
@@ -118,6 +125,7 @@ struct ContentView: View {
         .foregroundColor(selectedMode == mode ? AppTheme.accentGreen : AppTheme.subtleText)
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
+        .modifier(AppTheme.pointerCursor)
     }
 
     private func saveSession() {

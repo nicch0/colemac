@@ -179,7 +179,9 @@ struct StatsView: View {
 
     private func formatDate(_ date: Date) -> String {
         let f = DateFormatter()
-        f.dateFormat = "MMM d, HH:mm"
+        f.dateFormat = "MMM d, h:mma"
+        f.amSymbol = "am"
+        f.pmSymbol = "pm"
         return f.string(from: date)
     }
 

@@ -55,7 +55,12 @@ struct TypingView: View {
             }
         }
         .onKeyPress(.space) {
-            engine.handleKeyPress(" ") ? .handled : .ignored
+            if engine.state.isFinished {
+                engine.reset()
+                isFocused = true
+                return .handled
+            }
+            return engine.handleKeyPress(" ") ? .handled : .ignored
         }
         .onKeyPress(.escape) {
             if isZen {
@@ -88,13 +93,14 @@ struct TypingView: View {
             }
             .padding(.top, 8 * scale)
 
-            Button("again") {
-                engine.reset()
-                isFocused = true
+            HStack(spacing: 8) {
+                Text("again")
+                    .font(.system(size: 20 * scale, design: .monospaced))
+                    .foregroundColor(AppTheme.accentGreen)
+                Text("(space)")
+                    .font(.system(size: 14 * scale, design: .monospaced))
+                    .foregroundColor(AppTheme.subtleText)
             }
-            .buttonStyle(.plain)
-            .font(.system(size: 20 * scale, design: .monospaced))
-            .foregroundColor(AppTheme.accentGreen)
             .padding(.top, 24 * scale)
         }
     }
@@ -197,6 +203,7 @@ struct TypingView: View {
             .buttonStyle(.plain)
             .foregroundColor(AppTheme.subtleText)
             .font(AppTheme.monoFontSmall)
+            .modifier(AppTheme.pointerCursor)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
