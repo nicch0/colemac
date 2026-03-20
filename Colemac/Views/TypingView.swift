@@ -164,9 +164,21 @@ struct TypingView: View {
                             let spaceColor = prevIndex < engine.state.currentWordIndex
                                 ? AppTheme.correctText
                                 : AppTheme.untypedText
-                            Text(" ")
-                                .font(.system(size: fontSize, design: .monospaced))
-                                .foregroundColor(spaceColor)
+                            let cursorOnSpace = prevIndex == engine.state.currentWordIndex
+                                && engine.state.currentCharIndex >= engine.state.currentWord.count
+
+                            ZStack(alignment: .leading) {
+                                Text(" ")
+                                    .font(.system(size: fontSize, design: .monospaced))
+                                    .foregroundColor(spaceColor)
+
+                                if cursorOnSpace && cursorVisible {
+                                    Rectangle()
+                                        .fill(AppTheme.cursorColor)
+                                        .frame(width: 2, height: fontSize)
+                                        .offset(x: -1)
+                                }
+                            }
                         }
                         wordView(wordIndex: wordInfo.index, word: wordInfo.word, fontSize: fontSize)
                     }
