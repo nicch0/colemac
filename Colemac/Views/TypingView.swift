@@ -292,6 +292,34 @@ struct TypingView: View {
         return mins > 0 ? "\(mins):\(String(format: "%02d", secs))" : "\(secs)s"
     }
 
+    // MARK: - Helpers
+
+    static func makePreviewEngine(finished: Bool = false) -> TypingEngine {
+        let engine = TypingEngine()
+        engine.start(level: Level.all[0], mode: .words(count: 25))
+        if finished {
+            // Simulate some typing then finish
+            engine.state.totalKeystrokes = 120
+            engine.state.correctKeystrokes = 115
+            engine.state.startTime = Date().addingTimeInterval(-45)
+            engine.state.currentWordIndex = 25
+            engine.finish()
+        } else {
+            // Simulate partially typed
+            engine.state.startTime = Date().addingTimeInterval(-10)
+            engine.state.currentWordIndex = 3
+            engine.state.currentCharIndex = 2
+            engine.state.totalKeystrokes = 20
+            engine.state.correctKeystrokes = 18
+            for i in 0 ..< 3 {
+                let word = engine.state.words[i]
+                engine.state.typedChars[i] = word.map { _ in .correct }
+            }
+            engine.state.typedChars[3] = [.correct, .incorrect]
+        }
+        return engine
+    }
+
     // MARK: - Line splitting
 
     struct WordInfo {
@@ -303,7 +331,7 @@ struct TypingView: View {
         let words = engine.state.words
         let currentWordIndex = engine.state.currentWordIndex
 
-        // Build all lines from the start
+        // Build all lines
         var allLines: [[WordInfo]] = []
         var currentLine: [WordInfo] = []
         var lineWidth: CGFloat = 0
@@ -321,16 +349,6 @@ struct TypingView: View {
 
             currentLine.append(WordInfo(index: i, word: word))
             lineWidth += spaceWidth + wordWidth
-
-            // Stop building lines once we have enough ahead of cursor
-            if i > currentWordIndex + 3 {
-                let cursorFound = allLines.contains { line in
-                    line.contains { $0.index == currentWordIndex }
-                } || currentLine.contains { $0.index == currentWordIndex }
-                if cursorFound, allLines.count > 3 {
-                    break
-                }
-            }
         }
         if !currentLine.isEmpty {
             allLines.append(currentLine)
@@ -341,9 +359,20 @@ struct TypingView: View {
             line.contains { $0.index == currentWordIndex }
         } ?? 0
 
-        // Show current line + 2 after
-        let start = cursorLineIndex
+        // Cursor stays on the middle line (index 1 of 3).
+        // Once cursor moves past the first line, pin it to the middle.
+        let start = max(0, cursorLineIndex - 1)
         let end = min(start + 3, allLines.count)
         return Array(allLines[start ..< end])
     }
+}
+
+#Preview("Typing") {
+    TypingView(engine: TypingView.makePreviewEngine())
+        .frame(width: 800, height: 400)
+}
+
+#Preview("Finished") {
+    TypingView(engine: TypingView.makePreviewEngine(finished: true))
+        .frame(width: 800, height: 400)
 }

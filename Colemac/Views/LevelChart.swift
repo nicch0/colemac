@@ -61,3 +61,22 @@ struct LevelChart: View {
         }
     }
 }
+
+#Preview {
+    let sessions = (0 ..< 10).map { i in
+        Session(
+            date: Date().addingTimeInterval(Double(-10 + i) * 3600),
+            level: 1,
+            wpm: Double.random(in: 25 ... 60),
+            accuracy: Double.random(in: 85 ... 99),
+            duration: 30,
+            totalKeystrokes: 100,
+            correctKeystrokes: 90,
+            wordsTyped: 25
+        )
+    }
+    LevelChart(sessions: sessions, animated: true)
+        .padding()
+        .frame(width: 500, height: 300)
+        .background(AppTheme.background)
+}

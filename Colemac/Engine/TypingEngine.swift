@@ -10,7 +10,13 @@ class TypingEngine {
         state = TypingState()
         state.currentLevel = level
         state.sessionMode = mode
-        state.words = WordList.generatePracticeWords(for: level, count: 200)
+        let wordCount: Int
+        switch mode {
+        case .words(let count): wordCount = count
+        case .time: wordCount = 60
+        case .zen: wordCount = 40
+        }
+        state.words = WordList.generatePracticeWords(for: level, count: wordCount)
         state.typedChars = state.words.map { _ in [] }
         state.isActive = true
         state.isFinished = false
@@ -56,12 +62,7 @@ class TypingEngine {
 
         if state.currentCharIndex > 0 {
             state.currentCharIndex -= 1
-            if let removed = state.typedChars[state.currentWordIndex].popLast() {
-                state.totalKeystrokes -= 1
-                if removed == .correct {
-                    state.correctKeystrokes -= 1
-                }
-            }
+            state.typedChars[state.currentWordIndex].removeLast()
         } else if state.currentWordIndex > 0 {
             state.currentWordIndex -= 1
             state.currentCharIndex = state.typedChars[state.currentWordIndex].count
@@ -117,6 +118,8 @@ class TypingEngine {
         let word = state.currentWord
         guard state.currentCharIndex >= word.count else { return false }
 
+        state.totalKeystrokes += 1
+        state.correctKeystrokes += 1
         state.currentWordIndex += 1
         state.currentCharIndex = 0
 

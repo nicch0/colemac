@@ -33,6 +33,7 @@ struct StatsView: View {
                                 chartAnimated = true
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .center)
 
                     HStack(spacing: 8) {
                         Text(selectedLevel.map { "Level \($0.id): \($0.name)" } ?? "All Levels")
@@ -40,7 +41,7 @@ struct StatsView: View {
                             .foregroundColor(AppTheme.subtleText)
                             .frame(width: 140, alignment: .leading)
 
-                        Slider(value: $selectedLevelIndex, in: 0...Double(Level.all.count), step: 1)
+                        Slider(value: $selectedLevelIndex, in: 0 ... Double(Level.all.count), step: 1)
                             .tint(AppTheme.accentGreen)
                     }
                 }

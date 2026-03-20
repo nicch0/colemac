@@ -24,6 +24,14 @@ enum SessionMode: Hashable {
         if case .zen = self { return true }
         return false
     }
+
+    var storageLabel: String {
+        switch self {
+        case let .time(s): return "time \(s)"
+        case let .words(c): return "words \(c)"
+        case .zen: return "zen"
+        }
+    }
 }
 
 @Observable

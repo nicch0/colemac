@@ -101,3 +101,21 @@ struct KeyboardView: View {
         case space
     }
 }
+
+#Preview("Level 1") {
+    KeyboardView(currentLevel: Level.all[0])
+        .frame(width: 700, height: 250)
+        .background(AppTheme.background)
+}
+
+#Preview("Level 4") {
+    KeyboardView(currentLevel: Level.all[3])
+        .frame(width: 700, height: 250)
+        .background(AppTheme.background)
+}
+
+#Preview("Master") {
+    KeyboardView(currentLevel: Level.all[6])
+        .frame(width: 700, height: 250)
+        .background(AppTheme.background)
+}

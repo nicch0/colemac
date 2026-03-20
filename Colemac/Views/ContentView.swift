@@ -145,8 +145,15 @@ struct ContentView: View {
             totalKeystrokes: s.totalKeystrokes,
             correctKeystrokes: s.correctKeystrokes,
             mistypedKeys: s.mistypedKeys,
-            wordsTyped: s.wordsCompleted
+            wordsTyped: s.wordsCompleted,
+            mode: s.sessionMode.storageLabel
         )
         modelContext.insert(session)
     }
+}
+
+#Preview {
+    ContentView()
+        .modelContainer(for: Session.self, inMemory: true)
+        .frame(width: 900, height: 500)
 }
