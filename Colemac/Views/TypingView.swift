@@ -79,8 +79,10 @@ struct TypingView: View {
             return engine.handleKeyPress(" ") ? .handled : .ignored
         }
         .onKeyPress(.escape) {
-            if isZen {
-                engine.finish()
+            if engine.state.isActive && !engine.state.isFinished {
+                engine.reset()
+                isFocused = true
+                startCursorBlink()
             }
             return .handled
         }
