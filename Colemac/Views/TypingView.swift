@@ -4,7 +4,11 @@ struct TypingView: View {
     @Bindable var engine: TypingEngine
     @FocusState private var isFocused: Bool
     @State private var cursorVisible = true
+    @State private var idleTimer: Timer?
+    @State private var blinkTimer: Timer?
     @State private var deleteMonitor: Any?
+    @State private var showKeyboard = false
+    @State private var showResults = false
 
     private var isZen: Bool {
         engine.state.sessionMode.isZen
@@ -27,6 +31,12 @@ struct TypingView: View {
 
                 Spacer()
 
+                if showKeyboard && !engine.state.isFinished {
+                    KeyboardView(currentLevel: engine.state.currentLevel)
+                        .frame(maxHeight: geo.size.height * 0.3)
+                        .padding(.bottom, 8)
+                }
+
                 if !isZen && !engine.state.isFinished {
                     statsBar
                 }
@@ -43,12 +53,17 @@ struct TypingView: View {
             deleteMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
                 if event.keyCode == 51 { // backspace key
                     engine.handleBackspace()
+                    resetCursorBlink()
                     return nil // consume the event
                 }
                 return event
             }
         }
         .onDisappear {
+            idleTimer?.invalidate()
+            blinkTimer?.invalidate()
+            idleTimer = nil
+            blinkTimer = nil
             if let monitor = deleteMonitor {
                 NSEvent.removeMonitor(monitor)
                 deleteMonitor = nil
@@ -60,6 +75,7 @@ struct TypingView: View {
                 isFocused = true
                 return .handled
             }
+            resetCursorBlink()
             return engine.handleKeyPress(" ") ? .handled : .ignored
         }
         .onKeyPress(.escape) {
@@ -69,8 +85,13 @@ struct TypingView: View {
             return .handled
         }
         .onKeyPress(characters: .alphanumerics.union(.punctuationCharacters)) { press in
+            if press.modifiers.contains(.shift) && press.characters.uppercased() == "M" {
+                showKeyboard.toggle()
+                return .handled
+            }
             let key = press.characters
             guard !key.isEmpty else { return .ignored }
+            resetCursorBlink()
             return engine.handleKeyPress(key) ? .handled : .ignored
         }
     }
@@ -79,9 +100,10 @@ struct TypingView: View {
 
     private func resultsView(scale: CGFloat) -> some View {
         VStack(spacing: 16 * scale) {
-            Text(String(format: "%.0f", engine.state.wpm))
+            Text(String(format: "%.0f", showResults ? engine.state.wpm : 0))
                 .font(.system(size: 64 * scale, design: .monospaced))
                 .foregroundColor(AppTheme.accentGreen)
+                .contentTransition(.numericText(value: showResults ? engine.state.wpm : 0))
             Text("wpm")
                 .font(.system(size: 20 * scale, design: .monospaced))
                 .foregroundColor(AppTheme.subtleText)
@@ -102,6 +124,14 @@ struct TypingView: View {
                     .foregroundColor(AppTheme.subtleText)
             }
             .padding(.top, 24 * scale)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 2.0)) {
+                showResults = true
+            }
+        }
+        .onDisappear {
+            showResults = false
         }
     }
 
@@ -130,9 +160,13 @@ struct TypingView: View {
                 HStack(spacing: 0) {
                     ForEach(Array(line.enumerated()), id: \.offset) { wordOffset, wordInfo in
                         if wordOffset > 0 {
+                            let prevIndex = line[wordOffset - 1].index
+                            let spaceColor = prevIndex < engine.state.currentWordIndex
+                                ? AppTheme.correctText
+                                : AppTheme.untypedText
                             Text(" ")
                                 .font(.system(size: fontSize, design: .monospaced))
-                                .foregroundColor(AppTheme.untypedText)
+                                .foregroundColor(spaceColor)
                         }
                         wordView(wordIndex: wordInfo.index, word: wordInfo.word, fontSize: fontSize)
                     }
@@ -221,10 +255,34 @@ struct TypingView: View {
         }
     }
 
-    private func startCursorBlink() {
-        Timer.scheduledTimer(withTimeInterval: 0.53, repeats: true) { _ in
-            cursorVisible.toggle()
+    private func resetCursorBlink() {
+        // Stop any existing blink
+        blinkTimer?.invalidate()
+        blinkTimer = nil
+        cursorVisible = true
+
+        // After 0.25s idle, start blinking
+        idleTimer?.invalidate()
+        idleTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false) { _ in
+            DispatchQueue.main.async {
+                startBlinking()
+            }
         }
+    }
+
+    private func startBlinking() {
+        blinkTimer?.invalidate()
+        cursorVisible = true
+        blinkTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { _ in
+            DispatchQueue.main.async {
+                cursorVisible.toggle()
+            }
+        }
+    }
+
+    private func startCursorBlink() {
+        // Initial state: start blinking right away (no typing yet)
+        startBlinking()
     }
 
     private func formatDuration(_ t: TimeInterval) -> String {
@@ -265,11 +323,11 @@ struct TypingView: View {
             lineWidth += spaceWidth + wordWidth
 
             // Stop building lines once we have enough ahead of cursor
-            if allLines.count > 0 {
-                let lastLineContainsCursor = allLines.last?.contains(where: { $0.index == currentWordIndex }) ?? false
-                let currentLineContainsCursor = currentLine.contains(where: { $0.index == currentWordIndex })
-                if !lastLineContainsCursor, !currentLineContainsCursor, allLines.count > 3 {
-                    // We have enough lines past the cursor
+            if i > currentWordIndex + 3 {
+                let cursorFound = allLines.contains { line in
+                    line.contains { $0.index == currentWordIndex }
+                } || currentLine.contains { $0.index == currentWordIndex }
+                if cursorFound, allLines.count > 3 {
                     break
                 }
             }

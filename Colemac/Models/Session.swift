@@ -11,8 +11,9 @@ class Session {
     var totalKeystrokes: Int
     var correctKeystrokes: Int
     var mistypedKeys: [String: Int]
+    var wordsTyped: Int?
 
-    init(date: Date = .now, level: Int, wpm: Double, accuracy: Double, duration: TimeInterval, totalKeystrokes: Int, correctKeystrokes: Int, mistypedKeys: [String: Int] = [:]) {
+    init(date: Date = .now, level: Int, wpm: Double, accuracy: Double, duration: TimeInterval, totalKeystrokes: Int, correctKeystrokes: Int, mistypedKeys: [String: Int] = [:], wordsTyped: Int? = nil) {
         self.date = date
         self.level = level
         self.wpm = wpm
@@ -21,5 +22,6 @@ class Session {
         self.totalKeystrokes = totalKeystrokes
         self.correctKeystrokes = correctKeystrokes
         self.mistypedKeys = mistypedKeys
+        self.wordsTyped = wordsTyped
     }
 }

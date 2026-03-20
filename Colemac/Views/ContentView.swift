@@ -5,7 +5,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var engine = TypingEngine()
     @State private var selectedLevel = Level.all[0]
-    @State private var selectedMode: SessionMode = .time(seconds: 30)
+    @State private var selectedMode: SessionMode = .words(count: 50)
     @State private var showStats = false
 
     var body: some View {
@@ -38,6 +38,13 @@ struct ContentView: View {
         }
         .onAppear {
             engine.start(level: selectedLevel, mode: selectedMode)
+        }
+        .onKeyPress(.escape) {
+            if showStats {
+                showStats = false
+                return .handled
+            }
+            return .ignored
         }
     }
 
@@ -84,9 +91,9 @@ struct ContentView: View {
 
     private var modeSelector: some View {
         HStack(spacing: 2) {
-            modeGroup("time", [
-                .time(seconds: 15), .time(seconds: 30),
-                .time(seconds: 60), .time(seconds: 120),
+            modeGroup("words", [
+                .words(count: 10), .words(count: 25),
+                .words(count: 50), .words(count: 100),
             ])
 
             Text("|")
@@ -94,9 +101,9 @@ struct ContentView: View {
                 .font(AppTheme.monoFontSmall)
                 .padding(.horizontal, 6)
 
-            modeGroup("words", [
-                .words(count: 10), .words(count: 25),
-                .words(count: 50), .words(count: 100),
+            modeGroup("time", [
+                .time(seconds: 15), .time(seconds: 30),
+                .time(seconds: 60), .time(seconds: 120),
             ])
 
             Text("|")
@@ -137,7 +144,8 @@ struct ContentView: View {
             duration: s.elapsedTime,
             totalKeystrokes: s.totalKeystrokes,
             correctKeystrokes: s.correctKeystrokes,
-            mistypedKeys: s.mistypedKeys
+            mistypedKeys: s.mistypedKeys,
+            wordsTyped: s.wordsCompleted
         )
         modelContext.insert(session)
     }

@@ -9,6 +9,9 @@ enum AppTheme {
     static let cursorColor = Color.yellow
     static let accentGreen = Color(red: 0.4, green: 0.8, blue: 0.4)
     static let subtleText = Color.gray.opacity(0.6)
+    static let keyBorder = Color.purple.opacity(0.4)
+    static let keyOrange = Color(red: 0.9, green: 0.65, blue: 0.2)
+    static let keyPurple = Color(red: 0.7, green: 0.5, blue: 0.85)
 
     static let monoFont = Font.system(size: 20, design: .monospaced)
     static let monoFontSmall = Font.system(size: 14, design: .monospaced)

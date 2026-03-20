@@ -8,8 +8,8 @@ enum SessionMode: Hashable {
 
     var label: String {
         switch self {
-        case .time(let s): return "\(s)s"
-        case .words(let c): return "\(c)w"
+        case let .time(s): return "\(s)s"
+        case let .words(c): return "\(c)w"
         case .zen: return "zen"
         }
     }
@@ -35,7 +35,7 @@ class TypingState {
     var startTime: Date?
     var isActive: Bool = false
     var isFinished: Bool = false
-    var currentLevel: Level = Level.all[0]
+    var currentLevel: Level = .all[0]
     var sessionMode: SessionMode = .time(seconds: 30)
     var totalKeystrokes: Int = 0
     var correctKeystrokes: Int = 0
@@ -49,7 +49,7 @@ class TypingState {
     }
 
     var wpm: Double {
-        guard let start = startTime else { return 0 }
+        guard startTime != nil else { return 0 }
         let elapsed = elapsedTime / 60.0
         guard elapsed > 0.05 else { return 0 }
         return (Double(correctKeystrokes) / 5.0) / elapsed
@@ -71,12 +71,12 @@ class TypingState {
     }
 
     var targetWords: Int? {
-        if case .words(let count) = sessionMode { return count }
+        if case let .words(count) = sessionMode { return count }
         return nil
     }
 
     var targetSeconds: Int? {
-        if case .time(let s) = sessionMode { return s }
+        if case let .time(s) = sessionMode { return s }
         return nil
     }
 }

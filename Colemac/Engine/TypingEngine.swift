@@ -115,12 +115,7 @@ class TypingEngine {
 
     private func handleSpace() -> Bool {
         let word = state.currentWord
-        guard state.currentCharIndex > 0 else { return false }
-
-        if state.currentCharIndex < word.count {
-            let remaining = word.count - state.currentCharIndex
-            state.totalKeystrokes += remaining
-        }
+        guard state.currentCharIndex >= word.count else { return false }
 
         state.currentWordIndex += 1
         state.currentCharIndex = 0
