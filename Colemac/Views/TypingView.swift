@@ -1,9 +1,19 @@
 import SwiftUI
 
+private struct CursorPositionKey: PreferenceKey {
+    static var defaultValue: CGRect = .zero
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        let next = nextValue()
+        if next != .zero { value = next }
+    }
+}
+
 struct TypingView: View {
     @Bindable var engine: TypingEngine
+    @AppStorage("smoothCursor") private var smoothCursor = true
     @FocusState private var isFocused: Bool
     @State private var cursorVisible = true
+    @State private var cursorFrame: CGRect = .zero
     @State private var idleTimer: Timer?
     @State private var blinkTimer: Timer?
     @State private var deleteMonitor: Any?
@@ -72,6 +82,7 @@ struct TypingView: View {
         .onKeyPress(.space) {
             if engine.state.isFinished {
                 engine.reset()
+                cursorFrame = .zero
                 isFocused = true
                 return .handled
             }
@@ -81,6 +92,7 @@ struct TypingView: View {
         .onKeyPress(.escape) {
             if engine.state.isActive && !engine.state.isFinished {
                 engine.reset()
+                cursorFrame = .zero
                 isFocused = true
                 startCursorBlink()
             }
@@ -169,22 +181,41 @@ struct TypingView: View {
                             let cursorOnSpace = prevIndex == engine.state.currentWordIndex
                                 && engine.state.currentCharIndex >= engine.state.currentWord.count
 
-                            ZStack(alignment: .leading) {
-                                Text(" ")
-                                    .font(.system(size: fontSize, design: .monospaced))
-                                    .foregroundColor(spaceColor)
-
-                                if cursorOnSpace && cursorVisible {
-                                    Rectangle()
-                                        .fill(AppTheme.cursorColor)
-                                        .frame(width: 2, height: fontSize)
-                                        .offset(x: -1)
+                            Text(" ")
+                                .font(.system(size: fontSize, design: .monospaced))
+                                .foregroundColor(spaceColor)
+                                .background {
+                                    if cursorOnSpace {
+                                        GeometryReader { geo in
+                                            Color.clear.preference(
+                                                key: CursorPositionKey.self,
+                                                value: geo.frame(in: .named("wordDisplay"))
+                                            )
+                                        }
+                                    }
                                 }
-                            }
                         }
                         wordView(wordIndex: wordInfo.index, word: wordInfo.word, fontSize: fontSize)
                     }
                 }
+            }
+        }
+        .coordinateSpace(name: "wordDisplay")
+        .onPreferenceChange(CursorPositionKey.self) { frame in
+            if smoothCursor {
+                withAnimation(.easeOut(duration: 0.08)) {
+                    cursorFrame = frame
+                }
+            } else {
+                cursorFrame = frame
+            }
+        }
+        .overlay {
+            if cursorFrame != .zero && cursorVisible {
+                Rectangle()
+                    .fill(AppTheme.cursorColor)
+                    .frame(width: 2, height: cursorFrame.height)
+                    .position(x: cursorFrame.minX, y: cursorFrame.midY)
             }
         }
     }
@@ -195,18 +226,19 @@ struct TypingView: View {
                 let color = charColor(wordIndex: wordIndex, charIndex: charIndex)
                 let isCursor = wordIndex == engine.state.currentWordIndex && charIndex == engine.state.currentCharIndex
 
-                ZStack(alignment: .leading) {
-                    Text(String(char))
-                        .font(.system(size: fontSize, design: .monospaced))
-                        .foregroundColor(color)
-
-                    if isCursor && cursorVisible {
-                        Rectangle()
-                            .fill(AppTheme.cursorColor)
-                            .frame(width: 2, height: fontSize)
-                            .offset(x: -1)
+                Text(String(char))
+                    .font(.system(size: fontSize, design: .monospaced))
+                    .foregroundColor(color)
+                    .background {
+                        if isCursor {
+                            GeometryReader { geo in
+                                Color.clear.preference(
+                                    key: CursorPositionKey.self,
+                                    value: geo.frame(in: .named("wordDisplay"))
+                                )
+                            }
+                        }
                     }
-                }
             }
         }
     }

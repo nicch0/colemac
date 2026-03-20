@@ -7,6 +7,8 @@ struct ContentView: View {
     @State private var selectedLevel = Level.all[0]
     @State private var selectedMode: SessionMode = .words(count: 50)
     @State private var showStats = false
+    @State private var showSettings = false
+    @AppStorage("smoothCursor") private var smoothCursor = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -82,6 +84,31 @@ struct ContentView: View {
             .foregroundColor(AppTheme.accentGreen)
             .font(AppTheme.monoFontSmall)
             .modifier(AppTheme.pointerCursor)
+
+            Button {
+                showSettings.toggle()
+            } label: {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 14))
+                    .foregroundColor(AppTheme.subtleText)
+            }
+            .buttonStyle(.plain)
+            .modifier(AppTheme.pointerCursor)
+            .popover(isPresented: $showSettings) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Settings")
+                        .font(AppTheme.monoFont)
+                        .foregroundColor(AppTheme.correctText)
+
+                    Toggle("Smooth cursor", isOn: $smoothCursor)
+                        .font(AppTheme.monoFontSmall)
+                        .foregroundColor(AppTheme.correctText)
+                        .toggleStyle(.switch)
+                }
+                .padding(16)
+                .frame(width: 200)
+                .background(AppTheme.surfaceBackground)
+            }
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
