@@ -164,7 +164,8 @@ struct TypingView: View {
 
     private func wordDisplay(scale: CGFloat, containerWidth: CGFloat) -> some View {
         let fontSize = 24 * scale
-        let charWidth = fontSize * 0.605
+        let font = NSFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
+        let charWidth = font.advancement(forGlyph: font.glyph(withName: "space")).width
         let maxWidth = containerWidth - (48 * scale) // account for padding
 
         let lines = visibleLines(charWidth: charWidth, maxWidth: maxWidth)
@@ -203,7 +204,7 @@ struct TypingView: View {
         .coordinateSpace(name: "wordDisplay")
         .onPreferenceChange(CursorPositionKey.self) { frame in
             if smoothCursor {
-                withAnimation(.easeOut(duration: 0.08)) {
+                withAnimation(.easeOut(duration: 0.09)) {
                     cursorFrame = frame
                 }
             } else {
