@@ -9,6 +9,8 @@ struct ContentView: View {
     @State private var showStats = false
     @State private var showSettings = false
     @AppStorage("smoothCursor") private var smoothCursor = true
+    @AppStorage("rememberLastLevel") private var rememberLastLevel = true
+    @AppStorage("lastLevelId") private var lastLevelId = 1
 
     var body: some View {
         VStack(spacing: 0) {
@@ -36,9 +38,15 @@ struct ContentView: View {
         .onChange(of: engine.state.isFinished) { _, finished in
             if finished, engine.state.totalKeystrokes > 0 {
                 saveSession()
+                if rememberLastLevel {
+                    lastLevelId = selectedLevel.id
+                }
             }
         }
         .onAppear {
+            if rememberLastLevel, let level = Level.all.first(where: { $0.id == lastLevelId }) {
+                selectedLevel = level
+            }
             engine.start(level: selectedLevel, mode: selectedMode)
         }
         .onKeyPress(.escape) {
@@ -95,25 +103,42 @@ struct ContentView: View {
             .buttonStyle(.plain)
             .modifier(AppTheme.pointerCursor)
             .popover(isPresented: $showSettings) {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Settings")
-                        .font(AppTheme.monoFont)
-                        .foregroundColor(AppTheme.correctText)
-
-                    Toggle("Smooth cursor", isOn: $smoothCursor)
-                        .font(AppTheme.monoFontSmall)
-                        .foregroundColor(AppTheme.correctText)
-                        .toggleStyle(.switch)
-                }
-                .padding(16)
-                .frame(width: 200)
-                .background(AppTheme.surfaceBackground)
+                settings
             }
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
         .background(AppTheme.surfaceBackground)
         .colorScheme(.dark)
+    }
+
+    private var settings: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Settings")
+                .font(AppTheme.monoFont)
+                .foregroundColor(AppTheme.correctText)
+
+            HStack {
+                Text("Smooth cursor")
+                Spacer()
+                Toggle("", isOn: $smoothCursor)
+                    .foregroundColor(AppTheme.correctText)
+                    .toggleStyle(.switch)
+            }
+            .font(AppTheme.monoFontSmall)
+
+            HStack {
+                Text("Remember Last Level")
+                Spacer()
+                Toggle("", isOn: $rememberLastLevel)
+                    .font(AppTheme.monoFontSmall)
+                    .foregroundColor(AppTheme.correctText)
+                    .toggleStyle(.switch)
+            }
+            .font(AppTheme.monoFontSmall)
+        }
+        .padding(16)
+        .background(AppTheme.surfaceBackground)
     }
 
     private var modeSelector: some View {
