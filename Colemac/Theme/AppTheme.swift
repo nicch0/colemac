@@ -14,20 +14,27 @@ enum AppTheme {
     static let keyPurple = Color(red: 0.7, green: 0.5, blue: 0.85)
 
     static let monoFont = Font.system(size: 20, design: .monospaced)
+    static let monoFontMedium = Font.system(size: 16, design: .monospaced)
     static let monoFontSmall = Font.system(size: 14, design: .monospaced)
     static let monoFontLarge = Font.system(size: 24, design: .monospaced)
 
     static let pointerCursor = HoverModifier()
+}
 
-    struct HoverModifier: ViewModifier {
-        func body(content: Content) -> some View {
-            content.onHover { hovering in
-                if hovering {
-                    NSCursor.pointingHand.push()
-                } else {
-                    NSCursor.pop()
-                }
+struct HoverModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content.onHover { hovering in
+            if hovering {
+                NSCursor.pointingHand.push()
+            } else {
+                NSCursor.pop()
             }
         }
+    }
+}
+
+extension View {
+    func withHover() -> some View {
+        modifier(HoverModifier())
     }
 }

@@ -283,7 +283,7 @@ struct TypingView: View {
             .buttonStyle(.plain)
             .foregroundColor(AppTheme.subtleText)
             .font(AppTheme.monoFontSmall)
-            .modifier(AppTheme.pointerCursor)
+            .withHover()
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)

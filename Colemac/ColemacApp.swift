@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @main
 struct ColemacApp: App {
@@ -16,13 +16,14 @@ struct ColemacApp: App {
             for ext in ["", "-wal", "-shm"] {
                 try? FileManager.default.removeItem(at: url.deletingLastPathComponent().appending(path: "default.store\(ext)"))
             }
-            self.container = try! ModelContainer(for: Session.self)
+            container = try! ModelContainer(for: Session.self)
         }
     }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .font(AppTheme.monoFont)
         }
         .modelContainer(container)
         .windowStyle(.titleBar)

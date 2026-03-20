@@ -8,9 +8,9 @@ enum SessionMode: Hashable {
 
     var label: String {
         switch self {
-        case let .time(s): return "\(s)s"
-        case let .words(c): return "\(c)w"
-        case .zen: return "zen"
+        case let .time(s): return "\(s)"
+        case let .words(c): return "\(c)"
+        case .zen: return "Zen"
         }
     }
 
