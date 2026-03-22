@@ -46,6 +46,7 @@ struct StatsView: View {
                     }
                 }
                 .containerRelativeFrame(.horizontal) { width, _ in width * 0.6 }
+                .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.bottom, 12)
             }
 

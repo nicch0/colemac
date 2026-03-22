@@ -60,6 +60,13 @@ struct ContentView: View {
             }
             return .ignored
         }
+        .onKeyPress(.tab) {
+            if selectedMode.isZen {
+                selectedMode = .words(count: 50)
+                return .handled
+            }
+            return .ignored
+        }
     }
 
     private func saveSession() {

@@ -18,7 +18,6 @@ struct TypingView: View {
     @State private var blinkTimer: Timer?
     @State private var deleteMonitor: Any?
     @State private var showKeyboard = false
-    @State private var showResults = false
 
     private var isZen: Bool {
         engine.state.sessionMode.isZen
@@ -32,7 +31,13 @@ struct TypingView: View {
                 Spacer()
 
                 if engine.state.isFinished {
-                    resultsView(scale: scale)
+                    ResultView(
+                        scale: scale,
+                        wpm: engine.state.wpm,
+                        accuracy: engine.state.accuracy,
+                        wordsCompleted: engine.state.wordsCompleted,
+                        elapsedTime: engine.state.elapsedTime
+                    )
                 } else {
                     wordDisplay(scale: scale, containerWidth: geo.size.width)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -49,6 +54,13 @@ struct TypingView: View {
 
                 if !isZen && !engine.state.isFinished {
                     statsBar
+                }
+
+                if isZen && engine.state.isActive && !engine.state.isFinished {
+                    Text("tab to exit zen")
+                        .font(AppTheme.monoFontSmall)
+                        .foregroundColor(AppTheme.subtleText.opacity(0.4))
+                        .padding(.bottom, 12)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -107,56 +119,6 @@ struct TypingView: View {
             guard !key.isEmpty else { return .ignored }
             resetCursorBlink()
             return engine.handleKeyPress(key) ? .handled : .ignored
-        }
-    }
-
-    // MARK: - Results
-
-    private func resultsView(scale: CGFloat) -> some View {
-        VStack(spacing: 16 * scale) {
-            Text(String(format: "%.0f", showResults ? engine.state.wpm : 0))
-                .font(.system(size: 64 * scale, design: .monospaced))
-                .foregroundColor(AppTheme.accentGreen)
-                .contentTransition(.numericText(value: showResults ? engine.state.wpm : 0))
-            Text("wpm")
-                .font(.system(size: 20 * scale, design: .monospaced))
-                .foregroundColor(AppTheme.subtleText)
-
-            HStack(spacing: 32 * scale) {
-                resultItem("accuracy", String(format: "%.0f%%", engine.state.accuracy), scale: scale)
-                resultItem("words", "\(engine.state.wordsCompleted)", scale: scale)
-                resultItem("time", formatDuration(engine.state.elapsedTime), scale: scale)
-            }
-            .padding(.top, 8 * scale)
-
-            HStack(spacing: 8) {
-                Text("again")
-                    .font(.system(size: 20 * scale, design: .monospaced))
-                    .foregroundColor(AppTheme.accentGreen)
-                Text("(space)")
-                    .font(.system(size: 14 * scale, design: .monospaced))
-                    .foregroundColor(AppTheme.subtleText)
-            }
-            .padding(.top, 24 * scale)
-        }
-        .onAppear {
-            withAnimation(.easeOut(duration: 2.0)) {
-                showResults = true
-            }
-        }
-        .onDisappear {
-            showResults = false
-        }
-    }
-
-    private func resultItem(_ label: String, _ value: String, scale: CGFloat) -> some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(.system(size: 20 * scale, design: .monospaced))
-                .foregroundColor(AppTheme.correctText)
-            Text(label)
-                .font(.system(size: 14 * scale, design: .monospaced))
-                .foregroundColor(AppTheme.subtleText)
         }
     }
 
