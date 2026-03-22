@@ -10,6 +10,7 @@
           "blend-mode" : "normal",
           "fill" : "automatic",
           "glass" : false,
+          "hidden" : false,
           "image-name" : "clmk-logo-26.png",
           "name" : "clmk-logo-26",
           "position" : {
@@ -35,23 +36,18 @@
       "layers" : [
         {
           "glass" : false,
-          "image-name" : "Image.png",
-          "name" : "Image",
-          "position" : {
-            "scale" : 1,
-            "translation-in-points" : [
-              0,
-              0
-            ]
-          }
+          "hidden" : false,
+          "image-name" : "arst 2.svg",
+          "name" : "arst 2"
         }
       ],
       "shadow" : {
         "kind" : "neutral",
         "opacity" : 0.5
       },
+      "specular" : true,
       "translucency" : {
-        "enabled" : true,
+        "enabled" : false,
         "value" : 0.5
       }
     }
