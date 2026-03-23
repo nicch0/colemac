@@ -23,6 +23,20 @@ struct TypingView: View {
         engine.state.sessionMode.isZen
     }
 
+    private var sessionProgress: Double {
+        switch engine.state.sessionMode {
+        case let .time(seconds):
+            guard engine.state.startTime != nil else { return 0 }
+            let elapsed = engine.state.elapsedTime
+            return min(elapsed / Double(seconds), 1.0)
+        case let .words(count):
+            guard count > 0 else { return 0 }
+            return min(Double(engine.state.wordsCompleted) / Double(count), 1.0)
+        case .zen:
+            return 0
+        }
+    }
+
     var body: some View {
         GeometryReader { geo in
             let scale = max(0.6, geo.size.width / 900)
@@ -227,17 +241,23 @@ struct TypingView: View {
     // MARK: - Stats bar
 
     private var statsBar: some View {
-        HStack(spacing: 32) {
-            if let _ = engine.state.targetSeconds, engine.state.startTime != nil {
-                statItem(label: "", value: formatDuration(engine.state.remainingTime))
-            } else if case let .words(target) = engine.state.sessionMode {
-                statItem(label: "/ \(target)", value: "\(engine.state.wordsCompleted)")
+        HStack {
+            HStack(spacing: 32) {
+                if let _ = engine.state.targetSeconds, engine.state.startTime != nil {
+                    statItem(label: "", value: formatDuration(engine.state.remainingTime))
+                } else if case let .words(target) = engine.state.sessionMode {
+                    statItem(label: "/ \(target)", value: "\(engine.state.wordsCompleted)")
+                }
+
+                statItem(label: "wpm", value: String(format: "%.0f", engine.state.wpm))
+                statItem(label: "acc", value: String(format: "%.0f%%", engine.state.accuracy))
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            statItem(label: "wpm", value: String(format: "%.0f", engine.state.wpm))
-            statItem(label: "acc", value: String(format: "%.0f%%", engine.state.accuracy))
-
-            Spacer()
+            ProgressView(value: sessionProgress)
+                .tint(AppTheme.accentGreen)
+                .frame(width: 200)
+                .frame(maxWidth: .infinity, alignment: .center)
 
             Button("reset") {
                 engine.reset()
@@ -247,6 +267,7 @@ struct TypingView: View {
             .foregroundColor(AppTheme.subtleText)
             .font(AppTheme.monoFontSmall)
             .withHover()
+            .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
