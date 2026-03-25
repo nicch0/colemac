@@ -7,6 +7,7 @@ struct ToolbarView: View {
     @Binding var selectedMode: SessionMode
     @AppStorage("smoothCursor") private var smoothCursor = true
     @AppStorage("rememberLastLevel") private var rememberLastLevel = true
+    @AppStorage("showKeyboard") private var showKeyboard = true
 
     var body: some View {
         HStack(spacing: 16) {
@@ -82,6 +83,15 @@ struct ToolbarView: View {
                 Spacer()
                 Toggle("", isOn: $rememberLastLevel)
                     .font(AppTheme.monoFontSmall)
+                    .foregroundColor(AppTheme.correctText)
+                    .toggleStyle(.switch)
+            }
+            .font(AppTheme.monoFontSmall)
+
+            HStack {
+                Text("Show keyboard")
+                Spacer()
+                Toggle("", isOn: $showKeyboard)
                     .foregroundColor(AppTheme.correctText)
                     .toggleStyle(.switch)
             }

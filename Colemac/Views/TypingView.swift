@@ -17,7 +17,7 @@ struct TypingView: View {
     @State private var idleTimer: Timer?
     @State private var blinkTimer: Timer?
     @State private var deleteMonitor: Any?
-    @State private var showKeyboard = false
+    @AppStorage("showKeyboard") private var showKeyboard = true
 
     private var isZen: Bool {
         engine.state.sessionMode.isZen
