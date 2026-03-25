@@ -56,6 +56,11 @@ struct TypingView: View {
                     wordDisplay(scale: scale, containerWidth: geo.size.width)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(24 * scale)
+
+                    KeyboardView(currentLevel: engine.state.currentLevel)
+                        .frame(height: 120 * scale)
+                        .opacity(0.8)
+                        .padding(.horizontal, 24 * scale)
                 }
 
                 Spacer()

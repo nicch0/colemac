@@ -42,14 +42,22 @@ struct KeyboardView: View {
             let keySize = min(keyH, keyW)
             let fontSize = keySize * 0.4
 
+            // Row stagger offsets (fraction of keySize + gap)
+            let stagger: [CGFloat] = [0, 0.5, 0.75, 1.25]
+
             VStack(spacing: gap) {
-                ForEach(Array(Self.rows.enumerated()), id: \.offset) { _, row in
-                    HStack(spacing: gap) {
-                        ForEach(Array(row.enumerated()), id: \.offset) { _, keyDef in
-                            keyView(keyDef, keySize: keySize, fontSize: fontSize)
+                VStack(alignment: .leading, spacing: gap) {
+                    ForEach(Array(Self.rows.prefix(4).enumerated()), id: \.offset) { rowIndex, row in
+                        HStack(spacing: gap) {
+                            ForEach(Array(row.enumerated()), id: \.offset) { _, keyDef in
+                                keyView(keyDef, keySize: keySize, fontSize: fontSize)
+                            }
                         }
+                        .padding(.leading, stagger[rowIndex] * (keySize + gap))
                     }
                 }
+
+                keyView(.space, keySize: keySize, fontSize: fontSize)
             }
             .padding(padding)
             .frame(maxWidth: .infinity, maxHeight: .infinity)

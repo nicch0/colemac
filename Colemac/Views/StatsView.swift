@@ -47,7 +47,7 @@ struct StatsView: View {
                 }
                 .containerRelativeFrame(.horizontal) { width, _ in width * 0.6 }
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.bottom, 12)
+                .padding(.bottom, 32)
             }
 
             SessionHistoryTable(
@@ -55,6 +55,8 @@ struct StatsView: View {
                 modelContext: modelContext,
                 selected: $selected
             )
+            .containerRelativeFrame(.horizontal) { width, _ in width * 0.6 }
+            .frame(maxWidth: .infinity, alignment: .center)
         }
         .overlay {
             if sessions.isEmpty {

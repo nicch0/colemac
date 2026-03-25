@@ -38,8 +38,8 @@ struct SessionHistoryTable: View {
                         headerCell("Words", width: 60)
                         headerCell("Acc", width: 60)
                         headerCell("Time", width: 60)
-                        Spacer()
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(.bottom, 8)
 
                     ForEach(Array(sessions.enumerated()), id: \.element.persistentModelID) { _, session in
@@ -56,8 +56,8 @@ struct SessionHistoryTable: View {
                             dataCell("\(session.wordsTyped ?? 0)", width: 60)
                             dataCell(String(format: "%.0f%%", session.accuracy), width: 60)
                             dataCell(formatDuration(session.duration), width: 60)
-                            Spacer()
                         }
+                        .frame(maxWidth: .infinity)
                         .padding(.vertical, 4)
                         .padding(.horizontal, 4)
                         .background(isSelected ? Color.white.opacity(0.05) : .clear)
