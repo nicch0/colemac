@@ -8,6 +8,8 @@ struct ToolbarView: View {
     @AppStorage("smoothCursor") private var smoothCursor = true
     @AppStorage("rememberLastLevel") private var rememberLastLevel = true
     @AppStorage("showKeyboard") private var showKeyboard = true
+    @State private var showCustomInput = false
+    @State private var customLetters = ""
 
     var body: some View {
         HStack(spacing: 16) {
@@ -136,7 +138,72 @@ struct ToolbarView: View {
                 .padding(.horizontal, 6)
 
             modeButton(.zen)
+
+            Text("|")
+                .foregroundColor(AppTheme.subtleText)
+                .font(AppTheme.monoFontSmall)
+                .padding(.horizontal, 6)
+
+            Button("Custom") {
+                showCustomInput = true
+            }
+            .buttonStyle(.plain)
+            .font(AppTheme.monoFontSmall)
+            .foregroundColor(selectedMode.isCustom ? AppTheme.accentGreen : AppTheme.subtleText)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .withHover()
+            .popover(isPresented: $showCustomInput) {
+                customInputPopover
+            }
         }
+    }
+
+    private var customInputPopover: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Custom Letters")
+                .font(AppTheme.monoFont)
+                .foregroundColor(AppTheme.correctText)
+
+            Text("Words will contain at least one of these letters.")
+                .font(AppTheme.monoFontSmall)
+                .foregroundColor(AppTheme.subtleText)
+
+            TextField("e.g. zxqj", text: $customLetters)
+                .textFieldStyle(.plain)
+                .font(AppTheme.monoFont)
+                .foregroundColor(AppTheme.correctText)
+                .padding(8)
+                .background(AppTheme.background)
+                .cornerRadius(6)
+                .onChange(of: customLetters) { _, newValue in
+                    // Limit to 10 characters, letters only
+                    let filtered = String(newValue.lowercased().filter(\.isLetter).prefix(10))
+                    if filtered != newValue {
+                        customLetters = filtered
+                    }
+                }
+                .onSubmit {
+                    applyCustomMode()
+                }
+
+            Button("Start") {
+                applyCustomMode()
+            }
+            .buttonStyle(.plain)
+            .font(AppTheme.monoFontSmall)
+            .foregroundColor(customLetters.isEmpty ? AppTheme.subtleText : AppTheme.accentGreen)
+            .disabled(customLetters.isEmpty)
+        }
+        .padding(16)
+        .frame(width: 240)
+        .background(AppTheme.surfaceBackground)
+    }
+
+    private func applyCustomMode() {
+        guard !customLetters.isEmpty else { return }
+        selectedMode = .custom(letters: customLetters)
+        showCustomInput = false
     }
 
     private func modeGroup(_: String, _ modes: [SessionMode]) -> some View {

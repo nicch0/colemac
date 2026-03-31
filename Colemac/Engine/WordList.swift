@@ -7,8 +7,14 @@ enum WordList {
         }
     }
 
-    static func generatePracticeWords(for level: Level, count: Int = 100) -> [String] {
-        let available = words(for: level)
+    static func generatePracticeWords(for level: Level, count: Int = 100, requiredLetters: String? = nil) -> [String] {
+        var available = words(for: level)
+        if let letters = requiredLetters, !letters.isEmpty {
+            let letterSet = Set(letters.lowercased())
+            available = available.filter { word in
+                word.contains(where: { letterSet.contains($0) })
+            }
+        }
         guard !available.isEmpty else { return ["no", "words"] }
         return (0..<count).map { _ in available.randomElement()! }
     }

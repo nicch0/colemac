@@ -34,6 +34,8 @@ struct TypingView: View {
             return min(Double(engine.state.wordsCompleted) / Double(count), 1.0)
         case .zen:
             return 0
+        case .custom:
+            return min(Double(engine.state.wordsCompleted) / 50.0, 1.0)
         }
     }
 
@@ -252,6 +254,8 @@ struct TypingView: View {
                     statItem(label: "", value: formatDuration(engine.state.remainingTime))
                 } else if case let .words(target) = engine.state.sessionMode {
                     statItem(label: "/ \(target)", value: "\(engine.state.wordsCompleted)")
+                } else if case .custom = engine.state.sessionMode {
+                    statItem(label: "/ 50", value: "\(engine.state.wordsCompleted)")
                 }
 
                 statItem(label: "wpm", value: String(format: "%.0f", engine.state.wpm))

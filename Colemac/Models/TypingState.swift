@@ -5,12 +5,14 @@ enum SessionMode: Hashable {
     case time(seconds: Int)
     case words(count: Int)
     case zen
+    case custom(letters: String)
 
     var label: String {
         switch self {
         case let .time(s): return "\(s)"
         case let .words(c): return "\(c)"
         case .zen: return "Zen"
+        case .custom: return "Custom"
         }
     }
 
@@ -18,6 +20,7 @@ enum SessionMode: Hashable {
         .time(seconds: 15), .time(seconds: 30), .time(seconds: 60), .time(seconds: 120),
         .words(count: 10), .words(count: 25), .words(count: 50), .words(count: 100),
         .zen,
+        .custom(letters: ""),
     ]
 
     var isZen: Bool {
@@ -25,11 +28,22 @@ enum SessionMode: Hashable {
         return false
     }
 
+    var isCustom: Bool {
+        if case .custom = self { return true }
+        return false
+    }
+
+    var customLetters: String? {
+        if case let .custom(letters) = self { return letters }
+        return nil
+    }
+
     var storageLabel: String {
         switch self {
         case let .time(s): return "time \(s)"
         case let .words(c): return "words \(c)"
         case .zen: return "zen"
+        case let .custom(letters): return "custom \(letters)"
         }
     }
 }

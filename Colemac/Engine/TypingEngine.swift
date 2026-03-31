@@ -15,8 +15,9 @@ class TypingEngine {
         case .words(let count): wordCount = count
         case .time: wordCount = 60
         case .zen: wordCount = 40
+        case .custom: wordCount = 50
         }
-        state.words = WordList.generatePracticeWords(for: level, count: wordCount)
+        state.words = WordList.generatePracticeWords(for: level, count: wordCount, requiredLetters: mode.customLetters)
         state.typedChars = state.words.map { _ in [] }
         state.isActive = true
         state.isFinished = false
@@ -129,11 +130,16 @@ class TypingEngine {
                 finish()
                 return true
             }
+        } else if case .custom = state.sessionMode {
+            if state.wordsCompleted >= 50 {
+                finish()
+                return true
+            }
         }
 
         // Generate more words if running low
         if state.currentWordIndex >= state.words.count - 20 {
-            let more = WordList.generatePracticeWords(for: state.currentLevel, count: 50)
+            let more = WordList.generatePracticeWords(for: state.currentLevel, count: 50, requiredLetters: state.sessionMode.customLetters)
             state.words.append(contentsOf: more)
             state.typedChars.append(contentsOf: more.map { _ in [] })
         }
